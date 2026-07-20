@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AppShell } from "@/app/app-shell";
 import { AnatomySelector } from "./anatomy-selector";
+import { calculateArea, validateWoundDraft } from "@/lib/clinical/opd";
 
 const types = ["Diabetic Foot", "Vascular Wound", "Burn", "Post-Infective", "Pressure Injury", "Traumatic", "Surgical", "Other"];
 
@@ -11,7 +12,12 @@ export default function NewAssessment() {
   const [type, setType] = useState(types[0]);
   const [location, setLocation] = useState("");
   const [dimensions, setDimensions] = useState({ length: "", width: "", depth: "" });
-  const area = dimensions.length && dimensions.width ? (Number(dimensions.length) * Number(dimensions.width)).toFixed(2) : "—";
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [saved, setSaved] = useState(false);
+  const area = calculateArea(dimensions.length, dimensions.width);
+  const validation = useMemo(() => validateWoundDraft({ woundType: type, location, ...dimensions, photoCount: photos.length }), [type, location, dimensions, photos.length]);
+  useEffect(() => { const raw = window.localStorage.getItem("ekagra-opd-demo-draft"); if (!raw) return; try { const draft = JSON.parse(raw); setType(draft.type ?? types[0]); setLocation(draft.location ?? ""); setDimensions(draft.dimensions ?? { length: "", width: "", depth: "" }); setPhotos(draft.photos ?? []); } catch { window.localStorage.removeItem("ekagra-opd-demo-draft"); } }, []);
+  useEffect(() => { window.localStorage.setItem("ekagra-opd-demo-draft", JSON.stringify({ type, location, dimensions, photos })); setSaved(true); const timer = window.setTimeout(() => setSaved(false), 900); return () => window.clearTimeout(timer); }, [type, location, dimensions, photos]);
   const updateDimension = (key: "length" | "width" | "depth", value: string) => setDimensions((current) => ({ ...current, [key]: value }));
   const fields: Array<[string, string]> = [["Pain level", "Low / Moderate / Severe"], ["Changes", "Traumatic / Non-traumatic"], ["Edges", "Healthy / Cut-out / Undefined"], ["Floor covering", "Slough / Maggot / Bone / Tendon / Foreign body"], ["Granulation tissue", "Healthy / Unhealthy"], ["Slough", "None / Light / Moderate / Heavy"], ["Exudate", "None / Serous / Purulent"], ["Odor", "Yes / No"], ["Surrounding skin", "Healthy / Dry / Erythema / Macerated"]];
   return <AppShell>
@@ -29,8 +35,9 @@ export default function NewAssessment() {
         {fields.map(([label, placeholder]) => <label key={label}>{label}<input placeholder={placeholder} /></label>)}
       </div>
       <div className="calculation-strip"><span>Calculated area</span><strong>{area} cm²</strong><span>Area change from prior visit</span><strong>Unable to calculate until prior confirmed area is available</strong></div>
-      <div className="upload-strip"><strong>Wound photo required</strong><span>Capture from camera or upload · multiple angles supported · metadata recorded automatically</span><button className="secondary-button" type="button">Add photo</button></div>
-      <div className="form-actions"><span className="autosave">● Draft saved locally · {location ? "location selected" : "location required"}</span><button className="workspace-button" disabled={!location || !dimensions.length || !dimensions.width || !dimensions.depth}>Save draft & continue →</button></div>
+      <div className="upload-strip"><strong>Wound photo required</strong><span>{photos.length} photo{photos.length === 1 ? "" : "s"} · camera or upload · metadata recorded on save</span><label className="secondary-button">Add photo<input className="file-input" type="file" accept="image/*" capture="environment" multiple onChange={(event) => setPhotos((current) => [...current, ...Array.from(event.target.files ?? []).map((file) => file.name)])} /></label></div>
+      <div className="review-strip"><strong>Submission readiness</strong><span>{validation.valid ? "Ready for review" : `Incomplete: ${validation.missing.join(", ")}`}</span></div>
+      <div className="form-actions"><span className="autosave">● {saved ? "Saving draft…" : "Draft saved locally"} · {location ? "location selected" : "location required"}</span><button className="workspace-button" disabled={!validation.valid} onClick={() => window.alert("Draft ready for MO/consultant review. Supabase persistence will activate after staff sign-in.")}>Save draft & continue →</button></div>
     </div>
   </AppShell>;
 }
