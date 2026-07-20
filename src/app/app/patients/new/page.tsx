@@ -1,0 +1,4 @@
+import Link from "next/link";
+import { AppShell } from "@/app/app-shell";
+
+export default function NewPatient(){return <AppShell active="Patients"><div className="page-heading"><div><h1>Register patient</h1><p>Create a clinical record before starting an encounter.</p></div><Link className="text-link" href="/app/patients">← Back to patients</Link></div><div className="panel form-panel"><p className="eyebrow">Patient identity</p><div className="form-grid">{[["Full name","e.g. Rahima Begum"],["National ID (NID)","Required for registration"],["Phone number","+880 1XXX XXX XXX"],["Date of birth","dd / mm / yyyy"],["Sex","Select"],["Registration number","Generated on save"]].map(([label,placeholder])=><label key={label}>{label}<input placeholder={placeholder}/></label>)}</div><div className="form-actions"><Link className="text-link" href="/app/patients">Cancel</Link><button className="workspace-button">Save patient →</button></div></div></AppShell>}
