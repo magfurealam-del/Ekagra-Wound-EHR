@@ -1,0 +1,2 @@
+import { createBrowserClient } from "@/lib/supabase/browser";
+export async function loadWoundTimeline(woundId: string) { const client = createBrowserClient(); if (!client) return { data: [], error: "Supabase is not configured" }; return client.schema("clinical").from("wound_assessments").select("id, length_cm, width_cm, depth_cm, area_cm2, area_change_percent, status, created_at").eq("wound_id", woundId).order("created_at", { ascending: false }); }

@@ -1,0 +1,4 @@
+import { createBrowserClient } from "@/lib/supabase/browser";
+export async function uploadWoundPhoto(path: string, file: File) { const client = createBrowserClient(); if (!client) return { error: new Error("Supabase is not configured") }; return client.storage.from("wound-photos").upload(path, file, { contentType: file.type, upsert: false }); }
+export async function getWoundPhotoUrl(path: string, expiresIn = 900) { const client = createBrowserClient(); if (!client) return null; const { data } = await client.storage.from("wound-photos").createSignedUrl(path, expiresIn); return data?.signedUrl ?? null; }
+export function comparePhotoSets(previous: string[], current: string[]) { return { previousCount: previous.length, currentCount: current.length, added: current.filter((path) => !previous.includes(path)), removed: previous.filter((path) => !current.includes(path)) }; }

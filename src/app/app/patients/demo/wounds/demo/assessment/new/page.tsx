@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AppShell } from "@/app/app-shell";
 import { AnatomySelector } from "./anatomy-selector";
+import { RemoteDraftButton } from "./remote-draft-button";
 import { calculateArea, validateWoundDraft } from "@/lib/clinical/opd";
 
 const types = ["Diabetic Foot", "Vascular Wound", "Burn", "Post-Infective", "Pressure Injury", "Traumatic", "Surgical", "Other"];
@@ -38,6 +39,7 @@ export default function NewAssessment() {
       <div className="upload-strip"><strong>Wound photo required</strong><span>{photos.length} photo{photos.length === 1 ? "" : "s"} · camera or upload · metadata recorded on save</span><label className="secondary-button">Add photo<input className="file-input" type="file" accept="image/*" capture="environment" multiple onChange={(event) => setPhotos((current) => [...current, ...Array.from(event.target.files ?? []).map((file) => file.name)])} /></label></div>
       <div className="review-strip"><strong>Submission readiness</strong><span>{validation.valid ? "Ready for review" : `Incomplete: ${validation.missing.join(", ")}`}</span></div>
       <div className="form-actions"><span className="autosave">● {saved ? "Saving draft…" : "Draft saved locally"} · {location ? "location selected" : "location required"}</span><button className="workspace-button" disabled={!validation.valid} onClick={() => window.alert("Draft ready for MO/consultant review. Supabase persistence will activate after staff sign-in.")}>Save draft & continue →</button></div>
+      <RemoteDraftButton disabled={!validation.valid} />
     </div>
   </AppShell>;
 }

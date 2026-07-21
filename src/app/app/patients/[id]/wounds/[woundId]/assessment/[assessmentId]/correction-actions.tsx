@@ -1,0 +1,4 @@
+"use client";
+import { useState } from "react";
+import { resolveCorrectionRequest } from "@/lib/clinical/review-workflow";
+export function CorrectionActions({ requestId, status }: { requestId: string; status: string }) { const [message, setMessage] = useState(""); const [saving, setSaving] = useState(false); if (status === "resolved" || status === "rejected") return null; async function resolve(value: "resolved" | "rejected") { setSaving(true); const result = await resolveCorrectionRequest(requestId, value); setMessage(result.message); setSaving(false); if (result.ok) window.location.reload(); } return <span><button className="secondary-button" disabled={saving} onClick={() => resolve("resolved")}>Resolve</button> <button className="secondary-button" disabled={saving} onClick={() => resolve("rejected")}>Reject</button>{message && <small>{message}</small>}</span>; }
