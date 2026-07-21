@@ -11,6 +11,6 @@ export function calculateAreaChange(previousArea: number | null | undefined, cur
   return Number((((previousArea - currentArea) / previousArea) * 100).toFixed(2));
 }
 
-export function canConfirmAssessment(role: string | null | undefined) { return role === "physician"; }
-export function canMarkWoundHealed(role: string | null | undefined) { return role === "physician"; }
+export function canConfirmAssessment(role: string | null | undefined) { return role === "physician" || role === "super_admin"; }
+export function canMarkWoundHealed(role: string | null | undefined) { return role === "physician" || role === "super_admin"; }
 export function isClinicalDraft(status: string) { return status === "draft" || status === "returned"; }
