@@ -27,10 +27,10 @@ Admission H&P, safety screening, structured wound-type fields, intake/output, me
 
 ## Seed command
 
-Run from the canonical checkout after setting the three environment variables in the current terminal:
+Run from the canonical checkout after setting the three environment variables in the current terminal. The direct Node command avoids triggering package-manager install-script approval prompts:
 
 ```powershell
-pnpm demo:seed
+node scripts/seed-demo.mjs
 ```
 
 The seed script refuses a missing password, missing service-role key, or any Supabase URL other than `zhodknuzuyxzqgfjrghj`.
